@@ -29,36 +29,51 @@ const guiState = {
     }
 };
 
-const gui = new GUI();
+// const gui = new GUI();
 
 // bind guiState properties to GUI controls
-gui.add(guiState, 'cubeY', -5, 5, 0.1)
-    .name('Cube Y Position')
-    .onChange(value => {
-        cube.position.y = value;
-    });
+// gui.add(guiState, 'cubeY', -5, 5, 0.1)
+//     .name('Cube Y Position')
+//     .onChange(value => {
+//         cube.position.y = value;
+//     });
 
-gui.add(guiState, 'wireframe')
-    .name('Wireframe Mode')
-    .onChange(value => {
-        material.wireframe = value;
-    });
+// gui.add(guiState, 'wireframe')
+//     .name('Wireframe Mode')
+//     .onChange(value => {
+//         material.wireframe = value;
+//     });
 
-gui.addColor(guiState, 'materialColor')
-    .name('Cube Color')
-    .onChange(value => {
-        material.color.set(value);
-    });
+// gui.addColor(guiState, 'materialColor')
+//     .name('Cube Color')
+//     .onChange(value => {
+//         material.color.set(value);
+//     });
 
-gui.add(guiState, 'spin').name('Spin Cube');
-gui.add(guiState, 'reset').name('Reset Cube');
-
+// gui.add(guiState, 'spin').name('Spin Cube');
+// gui.add(guiState, 'reset').name('Reset Cube');
+const loadingManager = new THREE.LoadingManager();
+loadingManager.onStart = () => {
+    console.log('Loading started');
+};
+loadingManager.onLoad = () => {
+    console.log('Loading complete');
+};
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    console.log(`Loading file: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} files.`);
+};
+loadingManager.onError = (url) => {
+    console.log(`There was an error loading ${url}`);
+};
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const cubeTexture = textureLoader.load('static/textures/door/color.jpg');
 //  Three.js scene setup
 const scene = new THREE.Scene();
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({
-    color: guiState.materialColor,
-    wireframe: guiState.wireframe
+    // color: guiState.materialColor,
+    // wireframe: guiState.wireframe,
+    map: cubeTexture
 });
 const cube = new THREE.Mesh(geometry, material);
 cube.position.y = guiState.cubeY;
