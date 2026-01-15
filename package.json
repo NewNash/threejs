@@ -1,31 +1,18 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "threejs-journey-exercise",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix"
-  },
-  "dependencies": {
-    "gsap": "^3.14.2",
-    "lil-gui": "^0.21.0",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "three": "^0.182.0"
+    "dev": "vite",
+    "build": "vite build"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/three": "^0.182.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.1",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "vite": "^6.2.2",
+    "vite-plugin-restart": "^0.4.2"
+  },
+  "dependencies": {
+    "lil-gui": "^0.20.0",
+    "three": "^0.174.0"
   }
 }
