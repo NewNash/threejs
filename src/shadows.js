@@ -5,7 +5,7 @@ import Router from "./router.js";
 
 const router = new Router();
 
-let scene, camera, renderer, controls, gui;
+let scene, camera, renderer, controls, gui, sphere, sphereShadow;
 let animationId;
 let isSceneInitialized = false;
 
@@ -19,6 +19,13 @@ function initThreeScene() {
 
   // Scene
   scene = new THREE.Scene();
+
+  /**
+   * Textures
+   */
+  const textureLoader = new THREE.TextureLoader();
+  const bakedLoader = textureLoader.load("/textures/bakedShadow.jpg");
+  const simpleShadow = textureLoader.load("/textures/simpleShadow.jpg");
 
   /**
    * Lights
@@ -37,7 +44,7 @@ function initThreeScene() {
   gui.add(directionalLight.position, "z").min(-5).max(5).step(0.001);
   scene.add(directionalLight);
 
-  directionalLight.castShadow = true;
+  directionalLight.castShadow = false;
   directionalLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
   directionalLight.shadow.camera.top = 2;
   directionalLight.shadow.camera.bottom = -2;
@@ -54,7 +61,7 @@ function initThreeScene() {
 
   // SpotLight
   const spotLight = new THREE.SpotLight(0xffffff, 3, 10, Math.PI * 0.3);
-  spotLight.castShadow = true;
+  spotLight.castShadow = false;
   spotLight.shadow.mapSize.set(1024, 1024);
   spotLight.shadow.camera.fov = 30;
   spotLight.position.set(0, 2, 2);
@@ -69,7 +76,7 @@ function initThreeScene() {
 
   // pointLight
   const pointLight = new THREE.PointLight(0xffffff, 5);
-  pointLight.castShadow = true;
+  pointLight.castShadow = false;
   pointLight.position.set(-1, 1, 0);
   pointLight.shadow.mapSize.set(1024, 1024);
   pointLight.shadow.camera.near = 0.1;
@@ -77,6 +84,7 @@ function initThreeScene() {
   scene.add(pointLight);
 
   const pointLightHelper = new THREE.CameraHelper(pointLight.shadow.camera);
+  pointLightHelper.visible = false;
   scene.add(pointLightHelper);
 
   /**
@@ -90,17 +98,31 @@ function initThreeScene() {
   /**
    * Objects
    */
-  const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    material,
-  );
+  sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), material);
 
   sphere.castShadow = true;
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
+  const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(5, 5),
+    new THREE.MeshBasicMaterial({
+      //   map: bakedLoader,
+    }),
+  );
   plane.rotation.x = -Math.PI * 0.5;
   plane.position.y = -0.5;
   plane.receiveShadow = true;
   scene.add(sphere, plane);
+
+  sphereShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.5, 1.5),
+    new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      alphaMap: simpleShadow,
+      transparent: true,
+    }),
+  );
+  sphereShadow.rotation.x = -Math.PI * 0.5;
+  sphereShadow.position.y = plane.position.y + 0.01;
+  scene.add(sphereShadow);
 
   const sizes = {
     width: window.innerWidth,
@@ -145,8 +167,17 @@ function initThreeScene() {
   isSceneInitialized = true;
 }
 
+const clock = new THREE.Clock();
 function animate() {
   animationId = window.requestAnimationFrame(animate);
+  const elapsedTime = clock.getElapsedTime();
+  sphere.position.x = Math.cos(elapsedTime) * 1.5;
+  sphere.position.y = Math.abs(Math.sin(elapsedTime * 3));
+  sphere.position.z = Math.sin(elapsedTime) * 1.5;
+
+  sphereShadow.position.x = sphere.position.x;
+  sphereShadow.position.z = sphere.position.z;
+  sphereShadow.material.opacity = (1 - sphere.position.y) * 0.3;
   controls.update();
   renderer.render(scene, camera);
 }
