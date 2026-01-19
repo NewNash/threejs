@@ -120,6 +120,8 @@ function handleRouteChange() {
         }, 50);
     } else {
         stopAnimation();
+        // remove gui
+        if (gui) gui.destroy();
     }
 }
 
