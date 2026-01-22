@@ -5,17 +5,19 @@ import Router from "./router.js";
 import GUI from "lil-gui";
 
 const router = new Router();
-const gui = new GUI();
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, gui;
 let animationId = null;
 let isSceneInitialized = false;
 let timer;
 let sizes;
+let ghost1, ghost2, ghost3
 
 function initThreeScene() {
   if (isSceneInitialized) return;
+
   const canvas = document.querySelector("canvas.house_webgl");
   if (!canvas) return;
+  gui = new GUI();
 
   scene = new THREE.Scene();
 
@@ -269,6 +271,7 @@ function initThreeScene() {
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
     const grave = new THREE.Mesh(gravesGeometry, gravesMaterial);
+
     grave.position.set(x, 0.4 * Math.random(), z);
     grave.rotation.x = (Math.random() - 0.5) * 0.4;
     grave.rotation.y = (Math.random() - 0.5) * 0.4;
@@ -276,12 +279,25 @@ function initThreeScene() {
     graves.add(grave);
   }
 
-  const ambientLight = new THREE.AmbientLight("#ffffff", 0.5);
+  const ambientLight = new THREE.AmbientLight("#86cdff", 0.275);
   scene.add(ambientLight);
 
-  const directionalLight = new THREE.DirectionalLight("#ffffff", 1.5);
+  const directionalLight = new THREE.DirectionalLight("#86cdff", 1);
   directionalLight.position.set(3, 2, -8);
   scene.add(directionalLight);
+
+  // Door light
+  const doorLight = new THREE.PointLight("#ff7d46", 5);
+  doorLight.position.set(0, 2.2, 2.7);
+  house.add(doorLight);
+
+  /**
+ * Ghosts
+ */
+  ghost1 = new THREE.PointLight('#8800ff', 6)
+  ghost2 = new THREE.PointLight('#ff0088', 6)
+  ghost3 = new THREE.PointLight('#ff0000', 6)
+  scene.add(ghost1, ghost2, ghost3)
 
   sizes = {
     width: window.innerWidth,
@@ -308,6 +324,47 @@ function initThreeScene() {
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+  // Renderer
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+  directionalLight.castShadow = true
+  ghost1.castShadow = true
+  ghost2.castShadow = true
+  ghost3.castShadow = true
+
+  walls.castShadow = true
+  walls.receiveShadow = true
+  roofs.castShadow = true
+  floor.receiveShadow = true
+  for (const grave of graves.children) {
+    grave.castShadow = true
+    grave.receiveShadow = true
+  }
+
+  // Mappings
+  directionalLight.shadow.mapSize.width = 256
+  directionalLight.shadow.mapSize.height = 256
+  directionalLight.shadow.camera.top = 8
+  directionalLight.shadow.camera.right = 8
+  directionalLight.shadow.camera.bottom = - 8
+  directionalLight.shadow.camera.left = - 8
+  directionalLight.shadow.camera.near = 1
+  directionalLight.shadow.camera.far = 20
+
+  ghost1.shadow.mapSize.width = 256
+  ghost1.shadow.mapSize.height = 256
+  ghost1.shadow.camera.far = 10
+
+  ghost2.shadow.mapSize.width = 256
+  ghost2.shadow.mapSize.height = 256
+  ghost2.shadow.camera.far = 10
+
+  ghost3.shadow.mapSize.width = 256
+  ghost3.shadow.mapSize.height = 256
+  ghost3.shadow.camera.far = 10
+
   window.addEventListener("resize", () => {
     sizes.width = window.innerWidth;
     sizes.height = window.innerHeight;
@@ -325,6 +382,22 @@ function animate() {
   animationId = window.requestAnimationFrame(animate);
   timer.update();
   const elapsedTime = timer.getElapsed();
+  // Ghosts
+  const ghost1Angle = elapsedTime * 0.5
+  ghost1.position.x = Math.cos(ghost1Angle) * 4
+  ghost1.position.z = Math.sin(ghost1Angle) * 4
+  ghost1.position.y = Math.sin(ghost1Angle) * Math.sin(ghost1Angle * 2.34) * Math.sin(ghost1Angle * 3.45)
+
+  const ghost2Angle = - elapsedTime * 0.5
+  ghost2.position.x = Math.cos(ghost2Angle) * 5
+  ghost2.position.z = Math.sin(ghost2Angle) * 5
+  ghost2.position.y = Math.sin(ghost2Angle) * Math.sin(ghost2Angle * 2.34) * Math.sin(ghost2Angle * 3.45)
+
+  const ghost3Angle = elapsedTime * 0.23
+  ghost3.position.x = Math.cos(ghost3Angle) * 6
+  ghost3.position.z = Math.sin(ghost3Angle) * 6
+  ghost3.position.y = Math.sin(ghost3Angle) * Math.sin(ghost3Angle * 2.34) * Math.sin(ghost3Angle * 3.45)
+
   controls.update();
   renderer.render(scene, camera);
 }
