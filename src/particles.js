@@ -13,6 +13,10 @@ let renderer = null;
 let controls = null;
 let scene = null
 let camera = null;
+let particles = null;
+let particleGeometry = null;
+const particleCount = 5000;
+
 
 
 function initParticlesScene() {
@@ -29,19 +33,17 @@ function initParticlesScene() {
     /**
      * particles
      */
-    const particleGeometry = new THREE.BufferGeometry();
-    const count = 5000;
+    particleGeometry = new THREE.BufferGeometry();
     // 3: x y z
-    const positions = new Float32Array(count * 3);
+    const positions = new Float32Array(particleCount * 3);
     // 3: r g b
-    const colors = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i++) {
+    const colors = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i++) {
         positions[i] = (Math.random() - 0.5) * 10;
         colors[i] = Math.random();
     }
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
     const particleMaterial = new THREE.PointsMaterial({
         // color: 0xff88cc,
         size: 0.1,
@@ -56,7 +58,7 @@ function initParticlesScene() {
         vertexColors: true,
     })
     // points
-    const particles = new THREE.Points(particleGeometry, particleMaterial)
+    particles = new THREE.Points(particleGeometry, particleMaterial)
     scene.add(particles)
     /**
      * Sizes
@@ -99,9 +101,21 @@ function initParticlesScene() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 }
 
+const clock = new THREE.Clock();
 function animate() {
+    const elapsedTime = clock.getElapsedTime();
     animationId = requestAnimationFrame(animate);
+    // Update particles
+    // particles.rotation.x += 0.001;
+    // particles.rotation.y = elapsedTime * 0.02;
     // Update controls
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        const x = particleGeometry.attributes.position.array[i3 + 0];
+        particleGeometry.attributes.position.array[i3 + 1] =  Math.cos(elapsedTime + x)
+    }
+    particleGeometry.attributes.position.needsUpdate = true;
     controls.update();
     // Render
     renderer.render(scene, camera);
