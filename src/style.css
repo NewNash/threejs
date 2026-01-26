@@ -106,6 +106,7 @@ body {
   top: 0;
   left: 0;
   outline: none;
+  background: #1e1a20;
 }
 .section {
   display: flex;
