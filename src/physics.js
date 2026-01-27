@@ -51,6 +51,7 @@ function initScene() {
         shape: sphereShape,
         material: defaultMaterial
     })
+    sphereBody.applyLocalForce(new CANNON.Vec3(200, 0, 0), new CANNON.Vec3(0, 0, 0))
     world.addBody(sphereBody)
 
     // floor
@@ -159,6 +160,7 @@ function animate() {
     //update physics world
     world.step(1 / 60, deltaTime, 3)
     sphere.position.copy(sphereBody.position)
+    sphereBody.applyForce(new CANNON.Vec3(-0.3, 0, 0), sphereBody.position)
     //update controls
     controls.update()
     renderer.render(scene, camera)
