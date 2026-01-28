@@ -8,7 +8,8 @@ class Router {
       house: document.getElementById('house'),
       particles: document.getElementById('particles'),
       galaxy: document.getElementById('galaxy'),
-      physics: document.getElementById('physics')
+      physics: document.getElementById('physics'),
+      import: document.getElementById('import')
     }
     this.navLinks = document.querySelectorAll('.nav-link')
     this.currentRoute = null
