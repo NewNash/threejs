@@ -9,7 +9,8 @@ class Router {
       particles: document.getElementById('particles'),
       galaxy: document.getElementById('galaxy'),
       physics: document.getElementById('physics'),
-      import: document.getElementById('import')
+      import: document.getElementById('import'),
+      raycaster: document.getElementById('raycaster')
     }
     this.navLinks = document.querySelectorAll('.nav-link')
     this.currentRoute = null
