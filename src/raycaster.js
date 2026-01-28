@@ -2,10 +2,11 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
 import Router from './router.js'
+import { GLTFLoader } from 'three/examples/jsm/Addons.js'
 
 const router = new Router();
 
-let scene, camera, renderer, controls, raycaster, mouse
+let scene, camera, renderer, controls, raycaster, mouse, model;
 let animationId;
 let isSceneInitialized = false;
 let object1, object2, object3;
@@ -15,7 +16,28 @@ function initThreeScene() {
     const canvas = document.querySelector('canvas.raycaster_webgl');
     if (!canvas) return;
     scene = new THREE.Scene();
-
+    /**
+     * models
+     */
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
+        './models/Duck/glTF-Binary/Duck.glb',
+        (gltf) => {
+            // console.log(gltf);
+            // scale the model
+            model = gltf.scene
+            gltf.scene.position.y = -1.2
+            scene.add(gltf.scene);
+        }
+    )
+    /**
+     * lights
+     */
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    directionalLight.position.set(1, 1, 0);
+    scene.add(directionalLight);
     /**
      * Objects
      */
@@ -75,13 +97,13 @@ function initThreeScene() {
         mouse.y = - (e.clientY / sizes.height) * 2 + 1;
     });
     window.addEventListener('click', () => {
-        if(currentIntersect !== null){
-            console.log('click', currentIntersect.object); 
-            if(currentIntersect.object === object1){
+        if (currentIntersect !== null) {
+            console.log('click', currentIntersect.object);
+            if (currentIntersect.object === object1) {
                 console.log('click object1');
-            } else if(currentIntersect.object === object2){
+            } else if (currentIntersect.object === object2) {
                 console.log('click object2');
-            } else if(currentIntersect.object === object3){
+            } else if (currentIntersect.object === object3) {
                 console.log('click object3');
             }
         }
@@ -125,23 +147,38 @@ function animate() {
     raycaster.setFromCamera(mouse, camera);
     const objectsToTest = [object1, object2, object3];
     const intersects = raycaster.intersectObjects(objectsToTest);
-    for(const object of objectsToTest){
+    for (const object of objectsToTest) {
         object.material.color.set('#ff0000');
     }
-    for(const intersect of intersects){
+    for (const intersect of intersects) {
         intersect.object.material.color.set('#00ff00');
     }
-    if(intersects.length > 0){
-        if(currentIntersect === null){
+    if (intersects.length > 0) {
+        if (currentIntersect === null) {
             console.log('mouse enter');
         }
         currentIntersect = intersects[0];
-    }else{
-        if(currentIntersect !== null){
+    } else {
+        if (currentIntersect !== null) {
             console.log('mouse leave');
         }
         currentIntersect = null;
     }
+    if (model) {
+        const modelIntersects = raycaster.intersectObject(model);
+        if (modelIntersects.length) {
+            model.scale.set(1.2, 1.2, 1.2)
+        } else {
+            model.scale.set(1, 1, 1)
+        }
+        console.log(modelIntersects);
+    }
+    // for (const intersect of modelIntersects) {
+    //     if (intersect.object.name === 'Duck') {
+    //         intersect.object.material.color.set('#00ff00');
+    //     }
+    // }
+
     // Update controls
     controls.update();
 
